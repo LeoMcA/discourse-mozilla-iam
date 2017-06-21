@@ -150,6 +150,10 @@ module ::MozillaIAM
         { app_metadata: {} }.merge(profile)[:app_metadata]
       end
 
+      def users(uids)
+        get('users', { search_engine: 'v1', q: "user_id:(\"#{uids.join('" OR "')}\")" })
+      end
+
       private
 
       def get(path, params = false)
@@ -159,7 +163,9 @@ module ::MozillaIAM
 
         req = Net::HTTP::Get.new(uri)
         req['Authorization'] = "Bearer #{access_token}"
+        #puts access_token
 
+        #puts uri.to_s
         res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
           http.request(req)
         end
@@ -307,6 +313,30 @@ module ::MozillaIAM
       self.class.set(@user, key, value)
     end
   end
+<<<<<<< HEAD
+=======
+
+  class Profiles
+    def self.refresh(users)
+      # TODO: find out which of these is more performant
+      # uids_and_last_refreshes =
+      #   users.joins("JOIN user_custom_fields
+      #                AS uids
+      #                ON uids.user_id = users.id
+      #                AND uids.name = 'mozilla_iam_uid'")
+      #        .joins("LEFT JOIN user_custom_fields
+      #                AS last_refreshes
+      #                ON last_refreshes.user_id = users.id
+      #                AND last_refreshes.name = 'mozilla_iam_last_refreshed'")
+      #        .pluck('uids.value', 'last_refreshes.value')
+
+      ids = users.map(&:id)
+      uids =
+        UserCustomField.where(name: 'mozilla_iam_uid').where(user_id: ids).joins("LEFT JOIN user_custom_fields AS last_refreshes ON last_refreshes.user_id = user_custom_fields.user_id AND last_refreshes.name = 'mozilla_iam_last_refresh'").where("last_refreshes.value IS NULL OR CURRENT_TIMESTAMP > last_refreshes.value::timestamp + interval '15 seconds'").pluck('user_custom_fields.value')
+      API.users(uids)
+    end
+  end
+>>>>>>> save progress while waiting to hear back from auth0 about management api not working as docs say it should
 end
 
 after_initialize do
@@ -317,9 +347,15 @@ after_initialize do
     before_filter :check_iam_session
   end
 
+<<<<<<< HEAD
   DiscourseEvent.on(:before_create_notification) do |user, type, post, opts|
     MozillaIAM::Profile.refresh(user) if post.topic.category.read_restricted
   end
+=======
+  # DiscourseEvent.on(:before_create_notification) do |user, type, post, opts|
+  #   MozillaIAM::Profile.refresh(user) if post.topic.category.read_restricted
+  # end
+>>>>>>> save progress while waiting to hear back from auth0 about management api not working as docs say it should
 
   refresh_users = lambda do |users, post|
     users.each do |user|
