@@ -98,5 +98,28 @@ module IAMHelpers
 
     stub_request(:get, "https://auth.mozilla.auth0.com/api/v2/users/#{uid}?fields=app_metadata")
       .to_return(status: 200, body: MultiJson.dump(app_metadata: app_metadata))
+
+    stub_api_user(uid, app_metadata)
+  end
+
+  def stub_api_user(uid, app_metadata={})
+    @stub_api_store ||= {}
+    @stub_api_store[uid] = { user_id: uid, app_metadata: app_metadata }
+
+    users = @stub_api_store.values
+    stub_request(:get, "https://auth.mozilla.auth0.com/api/v2/users")
+      .with(query: hash_including({}))
+      .to_return(status: 200, body: MultiJson.dump(users: users))
+  end
+
+  def stub_api_users_search(uids)
+    stub_oauth_token_request
+
+    users = uids.map do |uid|
+      @stub_api_store[uid] if @stub_api_store
+    end
+
+    stub_request(:get, "https://auth.mozilla.auth0.com/api/v2/users?fields=user_id,app_metadata.groups,app_metadata.authoritativeGroups&include_totals=true&per_page=100&q=user_id.raw:(\"#{uids.join('" OR "')}\")&search_engine=v2")
+      .to_return(status: 200, body: MultiJson.dump(users: users))
   end
 end

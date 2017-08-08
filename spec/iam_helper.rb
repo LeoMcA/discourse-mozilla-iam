@@ -1,5 +1,6 @@
 require 'rails_helper'
-require_relative 'support/iam_helpers.rb'
+
+Dir[File.dirname(__FILE__) + '/support/*.rb'].each { |f| require f }
 
 require_relative '../db/migrate/20170608165435_create_group_mappings'
 CreateGroupMappings.new.migrate(:up) unless ActiveRecord::Base.connection.table_exists? 'mozilla_iam_group_mappings'

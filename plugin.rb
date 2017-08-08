@@ -151,7 +151,14 @@ module ::MozillaIAM
       end
 
       def users(uids)
-        get('users', { search_engine: 'v1', q: "user_id:(\"#{uids.join('" OR "')}\")" })
+        profiles = get('users', {
+          include_totals: true,
+          per_page: 100,
+          fields: 'user_id,app_metadata.groups,app_metadata.authoritativeGroups',
+          search_engine: 'v2',
+          q: "user_id.raw:(\"#{uids.join('" OR "')}\")"
+        })
+        { users: [] }.merge(profiles)[:users]
       end
 
       private
@@ -163,9 +170,7 @@ module ::MozillaIAM
 
         req = Net::HTTP::Get.new(uri)
         req['Authorization'] = "Bearer #{access_token}"
-        #puts access_token
 
-        #puts uri.to_s
         res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
           http.request(req)
         end
@@ -227,6 +232,10 @@ module ::MozillaIAM
       Profile.new(user, uid).refresh
     end
 
+    def self.update(user, profile)
+      Profile.new(user, profile[:user_id]).refresh_with(profile[:app_metadata])
+    end
+
     def initialize(user, uid)
       @user = user
       @uid = set(:uid, uid)
@@ -242,6 +251,11 @@ module ::MozillaIAM
         update_groups
         set_last_refresh(Time.now)
       end
+    end
+
+    def refresh_with(profile)
+      @profile = profile
+      force_refresh
     end
 
     private
@@ -313,8 +327,6 @@ module ::MozillaIAM
       self.class.set(@user, key, value)
     end
   end
-<<<<<<< HEAD
-=======
 
   class Profiles
     def self.refresh(users)
@@ -333,10 +345,17 @@ module ::MozillaIAM
       ids = users.map(&:id)
       uids =
         UserCustomField.where(name: 'mozilla_iam_uid').where(user_id: ids).joins("LEFT JOIN user_custom_fields AS last_refreshes ON last_refreshes.user_id = user_custom_fields.user_id AND last_refreshes.name = 'mozilla_iam_last_refresh'").where("last_refreshes.value IS NULL OR CURRENT_TIMESTAMP > last_refreshes.value::timestamp + interval '15 seconds'").pluck('user_custom_fields.value')
-      API.users(uids)
+      profiles = API.users(uids)
+      profiles.map do |profile|
+        user = UserCustomField.where(name: 'mozilla_iam_uid')
+                              .where(value: profile[:user_id])
+                              .first
+                              .user
+        Profile.update(user, profile)
+        profile[:user_id]
+      end
     end
   end
->>>>>>> save progress while waiting to hear back from auth0 about management api not working as docs say it should
 end
 
 after_initialize do
@@ -347,20 +366,12 @@ after_initialize do
     before_filter :check_iam_session
   end
 
-<<<<<<< HEAD
   DiscourseEvent.on(:before_create_notification) do |user, type, post, opts|
     MozillaIAM::Profile.refresh(user) if post.topic.category.read_restricted
   end
-=======
-  # DiscourseEvent.on(:before_create_notification) do |user, type, post, opts|
-  #   MozillaIAM::Profile.refresh(user) if post.topic.category.read_restricted
-  # end
->>>>>>> save progress while waiting to hear back from auth0 about management api not working as docs say it should
 
   refresh_users = lambda do |users, post|
-    users.each do |user|
-      MozillaIAM::Profile.refresh(user) if post.topic.category.read_restricted
-    end
+    MozillaIAM::Profiles.refresh(users) if post.topic.category.read_restricted
   end
 
   DiscourseEvent.on(:before_create_notifications_for_users, &refresh_users)
