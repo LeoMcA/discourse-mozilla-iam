@@ -23,7 +23,7 @@ describe MozillaIAM::Profiles do
       stub_api_user(uid1)
       stub_api_user(uid2)
       stub_api_users_search(uids)
-      result = MozillaIAM::Profiles.refresh([user1, user2, user3])
+      result = MozillaIAM::Profiles.refresh(User.all)
       expect(result).to eq(uids)
     end
 
@@ -31,7 +31,7 @@ describe MozillaIAM::Profiles do
       stub_api_user(uid1)
       stub_api_user(uid2)
       stub_api_users_search(uids)
-      MozillaIAM::Profiles.refresh(users)
+      MozillaIAM::Profiles.refresh(User.all)
 
       users.map! do |user|
         user.clear_custom_fields
@@ -54,7 +54,7 @@ describe MozillaIAM::Profiles do
       stub_api_user(uid2, groups: [])
       stub_api_users_search(uids)
 
-      MozillaIAM::Profiles.refresh(users)
+      MozillaIAM::Profiles.refresh(User.all)
       expect(group.users.count).to eq 1
       expect(group.users.first).to eq user1
     end
@@ -71,7 +71,7 @@ describe MozillaIAM::Profiles do
       stub_api_user(uid2, groups: ['iam_group'])
       stub_api_users_search(uids)
 
-      MozillaIAM::Profiles.refresh(users)
+      MozillaIAM::Profiles.refresh(User.all)
       group.users.reload
 
       expect(group.users.count).to eq(2)

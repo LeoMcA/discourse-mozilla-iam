@@ -330,29 +330,19 @@ module ::MozillaIAM
 
   class Profiles
     def self.refresh(users)
-      # TODO: find out which of these is more performant
-      # uids_and_last_refreshes =
-      #   users.joins("JOIN user_custom_fields
-      #                AS uids
-      #                ON uids.user_id = users.id
-      #                AND uids.name = 'mozilla_iam_uid'")
-      #        .joins("LEFT JOIN user_custom_fields
-      #                AS last_refreshes
-      #                ON last_refreshes.user_id = users.id
-      #                AND last_refreshes.name = 'mozilla_iam_last_refreshed'")
-      #        .pluck('uids.value', 'last_refreshes.value')
-
       ids = users.map(&:id)
       uids =
         UserCustomField.where(name: 'mozilla_iam_uid').where(user_id: ids).joins("LEFT JOIN user_custom_fields AS last_refreshes ON last_refreshes.user_id = user_custom_fields.user_id AND last_refreshes.name = 'mozilla_iam_last_refresh'").where("last_refreshes.value IS NULL OR CURRENT_TIMESTAMP > last_refreshes.value::timestamp + interval '15 seconds'").pluck('user_custom_fields.value')
       profiles = API.users(uids)
-      profiles.map do |profile|
-        user = UserCustomField.where(name: 'mozilla_iam_uid')
-                              .where(value: profile[:user_id])
-                              .first
-                              .user
-        Profile.update(user, profile)
-        profile[:user_id]
+      ActiveRecord::Base.transaction do
+        profiles.map do |profile|
+          user = UserCustomField.where(name: 'mozilla_iam_uid')
+                                .where(value: profile[:user_id])
+                                .first
+                                .user
+          Profile.update(user, profile)
+          profile[:user_id]
+        end
       end
     end
   end
