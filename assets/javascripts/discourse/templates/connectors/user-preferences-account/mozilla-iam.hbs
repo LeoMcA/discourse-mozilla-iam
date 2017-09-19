@@ -1,0 +1,11 @@
+<div class="control-group pref-iam">
+  <label class="control-label">IAM</label>
+  <div class="controls">
+    <span class="static">
+      {{#if check}}
+        {{mount-widget widget="emoji" args=(hash name="white_check_mark")}}
+      {{/if}}
+      Logged in with {{provider}}
+    </span>
+  </div>
+</div>
