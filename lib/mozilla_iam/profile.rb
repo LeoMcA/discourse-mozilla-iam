@@ -6,9 +6,10 @@ module MozillaIAM
       Profile.new(user, uid).refresh
     end
 
-    def initialize(user, uid)
+    def initialize(user, uid, login_data = {})
       @user = user
       @uid = set(:uid, uid)
+      login_data.each { |k, v| set(k, v) } if login_data
     end
 
     def refresh

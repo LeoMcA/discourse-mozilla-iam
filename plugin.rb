@@ -16,6 +16,8 @@ require 'auth/oauth2_authenticator'
 
 require_relative 'lib/mozilla_iam'
 
+register_asset 'stylesheets/mozilla_iam.scss'
+
 add_admin_route 'mozilla_iam.mappings.title', 'mozilla-iam.mappings'
 
 auth_provider(title: 'Mozilla',
@@ -25,12 +27,16 @@ auth_provider(title: 'Mozilla',
 
 after_initialize do
 
-  add_to_serializer(:AdminDetailedUser, :mozilla_iam, false) do
+  add_mozilla_iam = lambda do
     object.custom_fields.select do |k, v|
       k.start_with?('mozilla_iam')
     end.map do |k, v|
       [k.sub('mozilla_iam_', ''), v]
     end.to_h
   end
+
+  add_to_serializer(:AdminDetailedUser, :mozilla_iam, false, &add_mozilla_iam)
+
+  add_to_serializer(:User, :mozilla_iam, false, &add_mozilla_iam)
 
 end

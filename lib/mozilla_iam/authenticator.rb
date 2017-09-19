@@ -26,8 +26,16 @@ module MozillaIAM
         uid = payload['sub']
         result.extra_data = { uid: uid }
 
+        result.extra_data[:login_data] = login_data = {}
+        mozillians_profile = Mozillians::User.new.find_by_email(email)
+        if mozillians_profile
+          result.extra_data[:login_data][:mozillians_primary_email] =
+            login_data[:mozillians_primary_email] =
+            mozillians_profile['email']['value']
+        end
+
         if user
-          Profile.new(user, uid).force_refresh
+          Profile.new(user, uid, login_data).force_refresh
         end
 
         result
@@ -42,7 +50,8 @@ module MozillaIAM
 
     def after_create_account(user, auth)
       uid = auth[:extra_data][:uid]
-      Profile.new(user, uid).force_refresh
+      login_data = auth[:extra_data][:login_data]
+      Profile.new(user, uid, login_data).force_refresh
     end
 
     def register_middleware(omniauth)

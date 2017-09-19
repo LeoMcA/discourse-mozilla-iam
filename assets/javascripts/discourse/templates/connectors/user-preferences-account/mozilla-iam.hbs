@@ -1,0 +1,70 @@
+{{#if old_nda}}
+  <div class="control-group pref-iam">
+    <label class="control-label">NDA Access Migration</label>
+    <div class="instructions">
+      {{#if new_nda}}
+        continue logging in with github to maintain nda access
+      {{else}}
+        complete these steps to ensure you don't lose nda access
+      {{/if}}
+    </div>
+    <div class="controls">
+      <table class="checklist">
+        <tr>
+          <td>
+            {{#if mozillians_primary_email_mismatch}}
+              {{d-icon 'square-o'}}
+            {{else}}
+              {{d-icon 'check-square-o'}}
+            {{/if}}
+          </td>
+          <td>Update your email address here to {{email}}</td>
+        </tr>
+        <tr>
+          <td>
+            {{#if github}}
+              {{d-icon 'check-square-o'}}
+            {{else}}
+              {{d-icon 'square-o'}}
+            {{/if}}
+          </td>
+          <td>
+            Create a GitHub account with {{email}},<br>
+            <em>or</em> add it to your existing GitHub account and make it your primary
+          </td>
+        </tr>
+        <tr>
+          <td>
+            {{#if github}}
+              {{d-icon 'check-square-o'}}
+            {{else}}
+              {{d-icon 'square-o'}}
+            {{/if}}
+          </td>
+          <td>Enable MFA on GitHub</td>
+        </tr>
+        <tr>
+          <td>
+            {{#if github}}
+              {{d-icon 'check-square-o'}}
+            {{else}}
+              {{d-icon 'square-o'}}
+            {{/if}}
+          </td>
+          <td>Log in here using that GitHub account</td>
+        </tr>
+        <tr>
+          <td>
+            {{#if new_nda}}
+              {{d-icon 'check-square-o'}}
+            {{else}}
+              {{d-icon 'square-o'}}
+            {{/if}}
+          </td>
+          <td>Verify your GitHub account on Mozillians</td>
+        </tr>
+      </table>
+      <a href="#">Need help? More info here.</a>
+    </div>
+  </div>
+{{/if}}

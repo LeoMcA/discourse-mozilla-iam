@@ -8,3 +8,6 @@ auth0:
   auth0_client_secret:
     default: ''
     shadowed_by_global: true
+  mozillians_api_key:
+    default: ''
+    shadowed_by_global: true

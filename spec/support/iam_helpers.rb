@@ -55,8 +55,9 @@ module IAMHelpers
     "ad|Mozilla-LDAP|#{username}"
   end
 
-  def authenticate_with_id_token(id_token)
+  def authenticate_with_id_token(id_token, mozillians_profile = false)
     stub_jwks_request
+    MozillaIAM::Mozillians::User.any_instance.stubs(:find_by_email).returns(mozillians_profile)
 
     authenticator = MozillaIAM::Authenticator.new('auth0', trusted: true)
     authenticator.after_authenticate({
@@ -67,8 +68,8 @@ module IAMHelpers
     })
   end
 
-  def authenticate_user(user)
-    authenticate_with_id_token create_id_token(user)
+  def authenticate_user(user, mozillians_profile = false)
+    authenticate_with_id_token(create_id_token(user), mozillians_profile)
   end
 
   def stub_oauth_token_request
@@ -98,5 +99,25 @@ module IAMHelpers
 
     stub_request(:get, "https://auth.mozilla.auth0.com/api/v2/users/#{uid}?fields=app_metadata")
       .to_return(status: 200, body: MultiJson.dump(app_metadata: app_metadata))
+  end
+
+  def stub_mozillians_users_request(opts = {})
+    if (opts[:invalid_key])
+      stub_request(:get, "https://mozillians.org/api/v2/users/?email=#{opts[:email]}")
+        .with(headers: {'X-Api-Key'=>'invalid'})
+        .to_return(status: 403)
+    elsif (opts[:no_user])
+      body = MultiJson.dump({ count: 0 })
+      stub_request(:get, "https://mozillians.org/api/v2/users/?email=#{opts[:email]}")
+        .to_return(status: 200, body: body)
+    else
+      body = MultiJson.dump({ email: { value: opts[:email] } })
+      stub_request(:get, "https://mozillians.org/api/v2/users/20/")
+        .to_return(status: 200, body: body)
+
+      body = MultiJson.dump({ count: 1, results: [ '_url': 'https://mozillians.org/api/v2/users/20/' ] })
+      stub_request(:get, "https://mozillians.org/api/v2/users/?email=#{opts[:email]}")
+        .to_return(status: 200, body: body)
+    end
   end
 end

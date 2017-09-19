@@ -10,11 +10,24 @@ describe MozillaIAM::Profile do
   end
 
   context '#initialize' do
+    let(:user) { Fabricate(:user) }
+    let(:uid) { create_uid(user.username) }
     it "should save a user's uid" do
-      user = Fabricate(:user)
-      uid = create_uid(user.username)
-
       MozillaIAM::Profile.new(user, uid)
+
+      expect(user.custom_fields['mozilla_iam_uid']).to eq(uid)
+    end
+
+    it "should save any login_data provided" do
+      extra_login_data = 'this is really important'
+      MozillaIAM::Profile.new(user, uid, extra_login_data: extra_login_data)
+
+      expect(user.custom_fields['mozilla_iam_extra_login_data']).to eq(extra_login_data)
+    end
+
+    it "should survive if login_data is nil" do
+      login_data = nil
+      MozillaIAM::Profile.new(user, uid, login_data)
 
       expect(user.custom_fields['mozilla_iam_uid']).to eq(uid)
     end

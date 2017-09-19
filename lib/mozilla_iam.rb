@@ -5,6 +5,7 @@ require_relative 'mozilla_iam/application_extensions'
 require_relative 'mozilla_iam/authenticator'
 require_relative 'mozilla_iam/jwks'
 require_relative 'mozilla_iam/jwt'
+require_relative 'mozilla_iam/mozillians'
 require_relative 'mozilla_iam/profile'
 
 module MozillaIAM

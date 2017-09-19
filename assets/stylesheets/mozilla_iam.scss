@@ -1,0 +1,16 @@
+.pref-iam {
+
+  .ember-view {
+    display: inline-block;
+  }
+
+  label {
+    margin-bottom: 0;
+  }
+
+  .checklist td {
+    vertical-align: baseline;
+    padding-right: 0.5em;
+    padding-bottom: 0.25em;
+  }
+}

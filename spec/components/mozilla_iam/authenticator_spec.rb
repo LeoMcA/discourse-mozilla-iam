@@ -110,6 +110,28 @@ describe MozillaIAM::Authenticator do
 
       expect(result.user).to eq(nil)
     end
+
+    context "mozillians primary email" do
+      it "doesn't exist, so doesn't store it" do
+        user = Fabricate(:user)
+        result = authenticate_user(user)
+
+        expect(
+          user.custom_fields['mozilla_iam_mozillians_primary_email']
+        ).to eq(nil)
+      end
+
+      it "exists, so stores it" do
+        user = Fabricate(:user)
+        mozillians_primary_email = 'lmcardle@mozilla.com'
+        mozillians_profile = { 'email' => { 'value' => mozillians_primary_email } }
+        result = authenticate_user(user, mozillians_profile)
+
+        expect(
+          user.custom_fields['mozilla_iam_mozillians_primary_email']
+        ).to eq(mozillians_primary_email)
+      end
+    end
   end
 
   context '#after_create_account' do
