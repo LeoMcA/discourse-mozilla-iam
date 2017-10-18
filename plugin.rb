@@ -28,11 +28,13 @@ auth_provider(title: 'Mozilla',
 after_initialize do
 
   add_mozilla_iam = lambda do
-    object.custom_fields.select do |k, v|
-      k.start_with?('mozilla_iam')
-    end.map do |k, v|
-      [k.sub('mozilla_iam_', ''), v]
-    end.to_h
+    if scope.user&.id == object.id || scope.is_staff?
+      object.custom_fields.select do |k, v|
+        k.start_with?('mozilla_iam')
+      end.map do |k, v|
+        [k.sub('mozilla_iam_', ''), v]
+      end.to_h
+    end
   end
 
   add_to_serializer(:AdminDetailedUser, :mozilla_iam, false, &add_mozilla_iam)
