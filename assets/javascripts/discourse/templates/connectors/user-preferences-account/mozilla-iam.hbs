@@ -1,0 +1,44 @@
+<div class="control-group pref-emails">
+  <label class="control-label">{{i18n 'user.email.addresses'}}</label>
+  {{#if model.email}}
+    <div class="instructions">
+      {{i18n "user.email.instructions"}}
+    </div>
+
+    <div class="controls">
+      <label class="inline-label">{{i18n 'user.email.primary'}}</label>
+      {{#if model.can_edit_email}}
+        {{#link-to "preferences.email" class="btn btn-small btn-icon pad-left no-text"}}{{d-icon "pencil"}}{{/link-to}}
+      {{/if}}
+      <div>
+        {{model.email}}
+      </div>
+    </div>
+    <div class="instructions">
+      {{i18n 'user.email.primary_instructions'}}<br>
+      {{i18n 'user.email.primary_instructions_further'}}
+    </div>
+
+    {{#if model.secondary_emails}}
+      <div class="controls">
+        <label class="inline-label">{{i18n 'user.email.secondary'}}</label>
+        <a href="https://mozillians.org/user/edit/#idp-profiles" target="_blank" class="btn btn-small btn-icon pad-left no-text">
+          {{d-icon "pencil"}} {{i18n 'mozillians.edit'}}
+        </a>
+        <ul>
+          {{#each model.secondary_emails as |email| }}
+            <li>{{email}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      <div class="instructions">
+        {{i18n 'user.email.secondary_instructions'}}<br>
+        {{i18n 'user.email.secondary_instructions_further'}}
+      </div>
+    {{/if}}
+  {{else}}
+    <div class="controls">
+      {{d-button action="checkEmail" actionParam=model title="admin.users.check_email.title" icon="envelope-o" label="admin.users.check_email.text"}}
+    </div>
+  {{/if}}
+</div>
