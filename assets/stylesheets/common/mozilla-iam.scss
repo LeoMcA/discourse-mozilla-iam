@@ -1,0 +1,20 @@
+.pref-email {
+  display: none;
+}
+
+.pref-emails {
+  .control-label {
+    margin-bottom: 0;
+    line-height: 1.2;
+  }
+
+  .inline-label {
+    display: inline-block;
+    font-weight: bold;
+  }
+
+  ul {
+    margin: 0;
+    list-style: none;
+  }
+}
