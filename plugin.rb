@@ -24,3 +24,7 @@ auth_provider(title: 'Mozilla',
               message: 'Log In / Sign Up',
               authenticator: MozillaIAM::Authenticator.new('auth0', trusted: true),
               full_screen_login: true)
+
+after_initialize do
+  Users::OmniauthCallbacksController.view_paths = ["plugins/discourse-mozilla-iam/app/views", "app/views"]
+end

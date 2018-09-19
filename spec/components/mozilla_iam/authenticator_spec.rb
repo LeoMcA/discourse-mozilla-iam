@@ -124,6 +124,7 @@ describe MozillaIAM::Authenticator do
       result = authenticate_with_id_token(id_token)
 
       expect(result.failed).to eq true
+      pp result.failed_reason
     end
   end
 
