@@ -27,4 +27,10 @@ auth_provider(title: 'Mozilla',
 
 after_initialize do
   Users::OmniauthCallbacksController.view_paths = ["plugins/discourse-mozilla-iam/app/views", "app/views"]
+  Users::OmniauthCallbacksController.class_eval do
+    def failure
+      flash[:error] = I18n.t("login.omniauth_error_unknown")
+      render 'failure'
+    end
+  end
 end

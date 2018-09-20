@@ -3,9 +3,9 @@ module MozillaIAM
 
     def authorize_params
       params = super
-      if request.params.has_key? 'go_back'
-        params[:prompt] = 'login'
-      end
+      params[:prompt] = request.params["prompt"] if request.params.has_key? "prompt"
+      params[:action] = request.params["action"] if request.params.has_key? "action"
+      pp params
       params
     end
 
@@ -13,7 +13,7 @@ module MozillaIAM
       if request.params.any?
         super
       else
-        redirect '/auth/auth0?go_back'
+        redirect '/auth/auth0?prompt=login'
       end
     end
 
