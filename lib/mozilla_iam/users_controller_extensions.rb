@@ -12,14 +12,17 @@ module MozillaIAM
 
     def user_params
       result = super
-      if Profile.for(fetch_user_from_params)&.dinopark_enabled?
-        [
-          :name,
-          :title,
-          :bio_raw,
-          :location,
-          :website
-        ].each { |x| result.delete(x) }
+      begin
+        if Profile.for(fetch_user_from_params)&.dinopark_enabled?
+          [
+            :name,
+            :title,
+            :bio_raw,
+            :location,
+            :website
+          ].each { |x| result.delete(x) }
+        end
+      rescue Discourse::NotFound
       end
       result
     end
