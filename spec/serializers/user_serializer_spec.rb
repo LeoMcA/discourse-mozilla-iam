@@ -3,6 +3,11 @@ require_relative '../iam_helper'
 describe UserSerializer do
 
   shared_context "as the user" do
+    before do
+      stub_person_api_v2_profile_request(user.custom_fields["mozilla_iam_uid"], person_v2_profile_with(
+        primary_username: "bob"
+      ))
+    end
     let(:json) { UserSerializer.new(user, scope: Guardian.new(user), root: false).as_json }
   end
 
@@ -145,6 +150,32 @@ describe UserSerializer do
     context "as an anonymous user" do
       include_context "as an anonymous user"
       include_examples "not shown"
+    end
+  end
+
+  context "with a dinopark profile" do
+    let(:user) { Fabricate(:user) }
+    before do
+      user.custom_fields["mozilla_iam_uid"] = "ad|Mozilla-LDAP|bob"
+      user.save_custom_fields
+    end
+
+    context "as the user" do
+      include_context "as the user"
+
+      it "includes dinopark_profile" do
+        dinopark_profile = json[:dinopark_profile]
+        expect(dinopark_profile["username"]).to eq "bob"
+      end
+    end
+
+    context "as an anonymous user" do
+      include_context "as an anonymous user"
+
+      it "doesn't include dinopark_profile" do
+        dinopark_profile = json[:dinopark_profile]
+        expect(dinopark_profile).to_not be
+      end
     end
   end
 

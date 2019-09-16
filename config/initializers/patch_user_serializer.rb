@@ -11,3 +11,4 @@ UserSerializer.has_many :duplicate_accounts,
   serializer: MozillaIAM::DuplicateAccountsUserSerializer
 
 UserSerializer.include MozillaIAM::SerializerExtensions::MozillaIAM
+UserSerializer.include MozillaIAM::SerializerExtensions::DinoparkProfile
