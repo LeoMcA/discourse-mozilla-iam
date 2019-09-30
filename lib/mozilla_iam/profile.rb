@@ -26,8 +26,12 @@ module MozillaIAM
         profile.refresh unless profile.nil?
       end
 
+      def find_user_by_uid(uid)
+        UserCustomField.where(name: "mozilla_iam_uid", value: uid).last&.user
+      end
+
       def find_by_uid(uid)
-        user = UserCustomField.where(name: "mozilla_iam_uid", value: uid).last&.user
+        user = find_user_by_uid(uid)
         return if user.nil?
         return Profile.new(user, uid)
       end

@@ -63,8 +63,21 @@ describe MozillaIAM::Profile do
     end
   end
 
-  describe ".find_by_uid" do
+  describe ".find_user_by_uid" do
     it "returns a user who has the uid" do
+      profile
+      result = described_class.find_user_by_uid("uid")
+      expect(result).to eq user
+    end
+
+    it "returns nil if there's no user with that uid" do
+      result = described_class.find_user_by_uid("uid")
+      expect(result).to be_nil
+    end
+  end
+
+  describe ".find_by_uid" do
+    it "returns a user's profile who has the uid" do
       profile
       MozillaIAM::Profile.expects(:new).with(user, "uid").returns(profile)
       result = described_class.find_by_uid("uid")
