@@ -35,6 +35,28 @@ module MozillaIAM
         return if user.nil?
         return Profile.new(user, uid)
       end
+
+      def find_or_create_user_from_uid_and_secondary_emails(uid)
+        # This shouldn't be used to give users access from their uid,
+        # as it'll associate on secondary emails, meaning a staff
+        # account could be returned despite the uid coming from
+        # an insecure 1FA method of authentication
+
+        # DistributedMutex probably needed
+        user = find_user_by_uid(uid)
+        return user if user
+
+        email = API::Management.new.profile(uid).email
+        user = User.find_by_email(email)
+        raise EmailExistsError.new(email, user) if user
+
+        User.create!(
+          email: email,
+          username: UserNameSuggester.suggest(email),
+          name: User.suggest_name(email),
+          staged: true
+        )
+      end
     end
 
     def initialize(user, uid)
@@ -111,6 +133,16 @@ module MozillaIAM
     def set(key, value)
       self.class.set(@user, key, value)
     end
+
+    class EmailExistsError < StandardError
+      attr_reader :user
+
+      def initialize(email, user)
+        @user = user
+        super "attempted to create staged user with email #{email}, but a user with that email already exists"
+      end
+    end
+
   end
 end
 
