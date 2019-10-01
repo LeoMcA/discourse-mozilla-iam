@@ -1,5 +1,6 @@
 module MozillaIAM
   class Profile
+    attr_accessor :uid
     @refresh_methods = []
     @array_keys = []
 

@@ -118,6 +118,10 @@ describe MozillaIAM::Profile do
           }
         end
       end
+
+      context "and a profile with that uid doesn't exist" do
+        # TODO
+      end
     end
   end
 
