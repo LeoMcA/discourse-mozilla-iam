@@ -4,7 +4,7 @@ services:
   - docker
 
 before_install:
-  - git clone https://github.com/mozilla/discourse-mozilla-travis.git
+  - git clone https://github.com/LeoMcA/discourse-mozilla-travis.git -b upgrade-coveralls
 
 install: true
 
